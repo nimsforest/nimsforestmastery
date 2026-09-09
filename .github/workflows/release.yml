@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  MODULE: github.com/nimsforest/nimsforestmastery
+  BINARY: nimsforestmastery
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Build binaries for all platforms
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        LDFLAGS="-s -w -X main.version=${VERSION}"
+
+        GOOS=linux GOARCH=amd64 go build -o ${BINARY}-linux-amd64 -ldflags="${LDFLAGS}" ./cmd/nimsforestmastery
+        GOOS=linux GOARCH=arm64 go build -o ${BINARY}-linux-arm64 -ldflags="${LDFLAGS}" ./cmd/nimsforestmastery
+        GOOS=darwin GOARCH=amd64 go build -o ${BINARY}-darwin-amd64 -ldflags="${LDFLAGS}" ./cmd/nimsforestmastery
+        GOOS=darwin GOARCH=arm64 go build -o ${BINARY}-darwin-arm64 -ldflags="${LDFLAGS}" ./cmd/nimsforestmastery
+        GOOS=windows GOARCH=amd64 go build -o ${BINARY}-windows-amd64.exe -ldflags="${LDFLAGS}" ./cmd/nimsforestmastery
+
+    - name: Create checksums
+      run: sha256sum ${BINARY}-* > checksums.txt
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          nimsforestmastery-*
+          checksums.txt
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    needs: release
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to registry.nimsforest.com via GitHub OIDC
+      run: |
+        OIDC=$(curl -sfH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=registry.nimsforest.com" | jq -r '.value')
+        echo "$OIDC" | docker login registry.nimsforest.com -u oidc --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        REGISTRY=registry.nimsforest.com
+
+        docker build --build-arg VERSION=v${VERSION} -t ${REGISTRY}/${BINARY}:${VERSION} -t ${REGISTRY}/${BINARY}:latest .
+        docker push ${REGISTRY}/${BINARY}:${VERSION}
+        docker push ${REGISTRY}/${BINARY}:latest

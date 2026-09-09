@@ -1,0 +1,96 @@
+{{define "content"}}
+{{template "role-tabs" .Data}}
+
+<div class="mb-6">
+    <p class="text-sm text-soil/70">
+        Every unit below is generated from the artifacts that already run
+        this nim. Nothing on this page is authored per role.
+    </p>
+</div>
+
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Shared doctrine</h3>
+    <p class="text-sm text-soil/70 mt-1">Read these first. They are the same for every role.</p>
+    {{if .Data.DoctrineUnits}}
+    <ul class="mt-3 text-sm">
+        {{range .Data.DoctrineUnits}}
+        <li class="mt-1"><a href="/doctrine/{{.Slug}}" class="text-forest-green no-underline hover:underline">{{.Title}}</a></li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="text-sm text-soil/70 mt-3">No doctrine content is installed.</p>
+    {{end}}
+</div>
+
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Behavior</h3>
+    <p class="text-sm text-soil/70 mt-1">
+        How this nim really behaves, from its live prompt
+        ({{.Data.Bundle.Identity.PromptSource.Key}} at revision {{.Data.Bundle.Identity.PromptSource.Revision}}).
+    </p>
+    {{if .Data.Bundle.Identity.Prompt}}
+    <div class="prose prose-sm max-w-none text-canopy mt-4">{{renderMarkdown .Data.Bundle.Identity.Prompt}}</div>
+    {{else}}
+    <p class="text-sm text-soil/70 mt-4">This role has no behavior prompt in the catalog.</p>
+    {{end}}
+    {{range .Data.Bundle.Identity.CeremonyPrompts}}
+    <div class="mt-4 border-t border-sprout/30 pt-4">
+        <h4 class="text-sm font-semibold text-canopy">Ceremony: {{.Name}}</h4>
+        <p class="text-xs text-soil/70 mt-1">{{.Source.Key}} at revision {{.Source.Revision}}</p>
+        <div class="prose prose-sm max-w-none text-canopy mt-2">{{renderMarkdown .Content}}</div>
+    </div>
+    {{end}}
+</div>
+
+{{if .Data.Bundle.HumanSkills}}
+{{range .Data.Bundle.HumanSkills}}
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Skill: {{.Name}} <span class="text-sm text-soil/70 font-normal">(human archetype)</span></h3>
+    {{if .Description}}<p class="text-sm text-soil/70 mt-1">{{.Description}}</p>{{end}}
+    {{if .Content}}
+    <div class="prose prose-sm max-w-none text-canopy mt-4">{{renderMarkdown .Content}}</div>
+    {{else}}
+    <p class="text-sm text-soil/70 mt-4">The catalog has no full content for this skill; the description above is the whole skill.</p>
+    {{end}}
+</div>
+{{end}}
+{{else}}
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Human skills</h3>
+    <p class="text-sm text-soil/70 mt-2">No human-archetype skills are assigned to this role yet.</p>
+</div>
+{{end}}
+
+{{if .Data.Bundle.AgentSkills}}
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Agent skills</h3>
+    <p class="text-sm text-soil/70 mt-1">
+        The agent variant of this role materializes these through
+        <span class="font-mono text-xs">/roles/{{.Data.Bundle.Name}}.md</span>.
+    </p>
+    <ul class="mt-3 text-sm">
+        {{range .Data.Bundle.AgentSkills}}
+        <li class="mt-1"><span class="text-canopy font-semibold">{{.Name}}</span> <span class="text-soil/70">({{.AgentType}}){{if .Description}} {{.Description}}{{end}}</span></li>
+        {{end}}
+    </ul>
+</div>
+{{end}}
+
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 mb-4">
+    <h3 class="text-lg font-semibold text-canopy">Tools</h3>
+    {{if .Data.Bundle.Policy.Tools}}
+    <ul class="mt-2 text-sm">
+        {{range .Data.Bundle.Policy.Tools}}
+        <li class="mt-1"><span class="text-canopy font-semibold">{{.Name}}</span>{{if .Description}} <span class="text-soil/70">{{.Description}}</span>{{end}}</li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="text-sm text-soil/70 mt-2">No tools are assigned to this role.</p>
+    {{end}}
+</div>
+
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6">
+    <h3 class="text-lg font-semibold text-canopy">Data context</h3>
+    <p class="text-sm text-soil/70 mt-2">{{.Data.DataNote}}</p>
+</div>
+{{end}}

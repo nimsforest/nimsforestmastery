@@ -1,0 +1,8 @@
+{{define "content"}}
+<div class="mb-4">
+    <a href="/doctrine" class="text-sm text-soil/70 no-underline hover:text-forest-green">&larr; Doctrine</a>
+</div>
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6">
+    <div class="prose prose-sm max-w-none text-canopy">{{renderMarkdown .Data.Unit.Content}}</div>
+</div>
+{{end}}

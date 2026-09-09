@@ -1,0 +1,66 @@
+{{define "content"}}
+{{template "role-tabs" .Data}}
+
+<div class="flex flex-col lg:flex-row gap-4 items-start">
+    <div class="flex-1 w-full">
+        <div class="bg-forest-card rounded-xl border border-sprout/30 p-6">
+            <h3 class="text-lg font-semibold text-canopy">Meet {{.Data.Bundle.Identity.Name}}</h3>
+            {{if .Data.Bundle.Identity.Description}}
+            <p class="text-sm text-soil/70 mt-2">{{.Data.Bundle.Identity.Description}}</p>
+            {{end}}
+            {{if .Data.Bundle.Identity.LongDescription}}
+            <div class="prose prose-sm max-w-none text-canopy mt-4">{{renderMarkdown .Data.Bundle.Identity.LongDescription}}</div>
+            {{else}}
+            <p class="text-sm text-soil/70 mt-4">The catalog holds no long description for this role yet.</p>
+            {{end}}
+        </div>
+    </div>
+    <div class="flex-1 w-full">
+        <div class="bg-forest-card rounded-xl border border-sprout/30 p-6">
+            <h3 class="text-sm font-semibold text-soil/70 uppercase tracking-wider">Live identity</h3>
+            <dl class="text-sm mt-3">
+                {{if .Data.Bundle.Identity.Role}}
+                <dt class="text-soil/70">Role</dt>
+                <dd class="text-canopy mb-2">{{.Data.Bundle.Identity.Role}}</dd>
+                {{end}}
+                {{if .Data.Bundle.Identity.Category}}
+                <dt class="text-soil/70">Category</dt>
+                <dd class="text-canopy mb-2">{{.Data.Bundle.Identity.Category}}</dd>
+                {{end}}
+                <dt class="text-soil/70">Agent type</dt>
+                <dd class="text-canopy mb-2">{{.Data.Bundle.Policy.AgentType}}</dd>
+                {{if .Data.Bundle.Policy.Model}}
+                <dt class="text-soil/70">Model</dt>
+                <dd class="text-canopy mb-2">{{.Data.Bundle.Policy.Model}}</dd>
+                {{end}}
+            </dl>
+            {{if .Data.Bundle.Identity.Subjects}}
+            <h3 class="text-sm font-semibold text-soil/70 uppercase tracking-wider mt-4">Subjects</h3>
+            <ul class="mt-2">
+                {{range .Data.Bundle.Identity.Subjects}}
+                <li class="font-mono text-xs text-canopy bg-forest-bg rounded px-2 py-1 mt-1 inline-block mr-1">{{.}}</li>
+                {{end}}
+            </ul>
+            {{end}}
+            <h3 class="text-sm font-semibold text-soil/70 uppercase tracking-wider mt-4">Backing humans</h3>
+            {{if .Data.Bundle.Identity.BackingHumans}}
+            <ul class="mt-2">
+                {{range .Data.Bundle.Identity.BackingHumans}}
+                <li class="text-sm text-canopy mt-1">{{.}}</li>
+                {{end}}
+            </ul>
+            <p class="text-xs text-soil/70 mt-2">
+                Source: {{.Data.Bundle.Identity.BackingSource.Key}} at revision
+                {{.Data.Bundle.Identity.BackingSource.Revision}}.
+            </p>
+            {{else}}
+            <p class="text-sm text-soil/70 mt-2">Nobody backs this role yet. You can be the first.</p>
+            {{end}}
+            <p class="text-xs text-soil/70 mt-4">
+                Source: {{.Data.Bundle.Identity.Source.Key}} at revision
+                {{.Data.Bundle.Identity.Source.Revision}}, generated at request time.
+            </p>
+        </div>
+    </div>
+</div>
+{{end}}

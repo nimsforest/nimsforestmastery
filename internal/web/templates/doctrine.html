@@ -1,0 +1,25 @@
+{{define "content"}}
+<div class="mb-6">
+    <h2 class="text-2xl font-semibold text-canopy">Doctrine</h2>
+    <p class="text-sm text-soil/70 mt-1">
+        The shared curriculum. These units are the same for every role;
+        the role pages carry everything role-specific.
+    </p>
+</div>
+
+{{if .Data.Units}}
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {{range .Data.Units}}
+    <a href="/doctrine/{{.Slug}}" class="block bg-forest-card rounded-xl border border-sprout/30 p-5 no-underline hover:border-forest-green/50 transition-colors">
+        <span class="text-lg font-semibold text-canopy">{{.Title}}</span>
+        {{if .Summary}}<p class="text-sm text-soil/70 mt-2">{{.Summary}}</p>{{end}}
+    </a>
+    {{end}}
+</div>
+{{else}}
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 text-sm text-soil/70">
+    No doctrine content is installed. The units ship on disk in the
+    content directory of the deployed image.
+</div>
+{{end}}
+{{end}}

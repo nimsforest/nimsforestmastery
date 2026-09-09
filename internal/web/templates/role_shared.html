@@ -1,0 +1,19 @@
+{{define "role-tabs"}}
+<div class="mb-6">
+    <h2 class="text-2xl font-semibold text-canopy">{{.Bundle.Identity.Name}}</h2>
+    {{if .Bundle.Identity.Role}}<p class="text-sm text-soil/70 mt-1">{{.Bundle.Identity.Role}}</p>{{end}}
+    <nav class="flex gap-4 mt-4 border-b border-sprout/30 text-sm">
+        <a href="/roles/{{.Bundle.Name}}" class="pb-2 no-underline {{if eq .ActiveTab "meet"}}text-forest-green border-b-2 border-forest-green/30 font-semibold{{else}}text-soil/70 hover:text-forest-green{{end}}">Meet</a>
+        <a href="/roles/{{.Bundle.Name}}/learn" class="pb-2 no-underline {{if eq .ActiveTab "learn"}}text-forest-green border-b-2 border-forest-green/30 font-semibold{{else}}text-soil/70 hover:text-forest-green{{end}}">Learn</a>
+        <a href="/roles/{{.Bundle.Name}}/changelog" class="pb-2 no-underline {{if eq .ActiveTab "changelog"}}text-forest-green border-b-2 border-forest-green/30 font-semibold{{else}}text-soil/70 hover:text-forest-green{{end}}">Changelog</a>
+        <a href="/roles/{{.Bundle.Name}}.md" class="pb-2 no-underline text-soil/70 hover:text-forest-green ml-auto">Agent page</a>
+    </nav>
+</div>
+{{if .Bundle.Degraded}}
+<div class="mb-6 rounded-lg border border-sprout/30 bg-forest-card px-4 py-3 text-sm text-soil/70">
+    Soil was not reachable. This page came from the nimregistry fallback.
+    Tool and skill assignments live only in Soil, so those sections are
+    empty here, not zero by design.
+</div>
+{{end}}
+{{end}}

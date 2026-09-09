@@ -1,0 +1,36 @@
+{{define "content"}}
+<div class="mb-6">
+    <h2 class="text-2xl font-semibold text-canopy">Roles</h2>
+    <p class="text-sm text-soil/70 mt-1">
+        One mastery path per nim in the {{.Data.Org}} forest. This list is the
+        live catalog enumeration; no role is authored here. Sign in with
+        iamnim to open a role path.
+    </p>
+</div>
+
+{{if .Data.Degraded}}
+<div class="mb-6 rounded-lg border border-sprout/30 bg-forest-card px-4 py-3 text-sm text-soil/70">
+    Soil was not reachable. This directory came from the nimregistry fallback.
+</div>
+{{end}}
+
+{{if .Data.Roles}}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {{range .Data.Roles}}
+    <a href="/roles/{{.Name}}" class="block bg-forest-card rounded-xl border border-sprout/30 p-5 no-underline hover:border-forest-green/50 transition-colors">
+        <div class="flex items-center justify-between gap-2">
+            <span class="text-lg font-semibold text-canopy">{{.Name}}</span>
+            {{if .Category}}<span class="text-xs text-soil/70 uppercase tracking-wider">{{.Category}}</span>{{end}}
+        </div>
+        {{if .Role}}<p class="text-sm text-forest-green mt-1">{{.Role}}</p>{{end}}
+        {{if .Description}}<p class="text-sm text-soil/70 mt-2">{{.Description}}</p>{{end}}
+    </a>
+    {{end}}
+</div>
+{{else}}
+<div class="bg-forest-card rounded-xl border border-sprout/30 p-6 text-sm text-soil/70">
+    The catalog holds no nims yet. A nim created through the registry
+    appears here automatically.
+</div>
+{{end}}
+{{end}}
