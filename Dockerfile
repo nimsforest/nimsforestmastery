@@ -20,5 +20,5 @@ COPY content /usr/share/nimsforestmastery/content
 ENV CONTENT_DIR=/usr/share/nimsforestmastery/content
 RUN adduser -D -H nimsforest
 USER nimsforest
-EXPOSE 8110
+EXPOSE 8111
 ENTRYPOINT ["nimsforestmastery"]

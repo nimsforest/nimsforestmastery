@@ -40,7 +40,7 @@ HTTP API), stamped with the revision of each source key.
 | Variable | Purpose |
 | --- | --- |
 | `ORG_SLUG` | Required. Single tenancy; the service refuses to start without it. |
-| `PORT` | Listen port, default `8110`. |
+| `PORT` | Listen port, default `8111`. |
 | `NATS_URL` | The forest bus, default `nats://127.0.0.1:4222`. Unreachable NATS degrades to the nimregistry fallback. |
 | `IAMNIM_URL` | Identity service. No default on purpose; empty fails closed with 503. |
 | `BASE_URL` | This portal's external URL, the login return target. Empty fails the human role pages closed. |

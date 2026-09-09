@@ -19,7 +19,7 @@ nimsforest2/docs/architecture/ROLE_MASTERY.md.
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `ORG_SLUG` | yes | none | Single tenancy. The service refuses to start without it. |
-| `PORT` | no | `8110` | HTTP listen port. |
+| `PORT` | no | `8111` | HTTP listen port. |
 | `NATS_URL` | no | `nats://127.0.0.1:4222` | The forest bus. Unreachable NATS degrades, it does not stop the service. |
 | `IAMNIM_URL` | for auth | none, on purpose | Identity service. Empty means every authenticated route answers 503, fail closed. |
 | `BASE_URL` | for SSO | none | The portal's own external URL, the iamnim login return target. Empty means the human role pages answer 503. |
@@ -41,12 +41,12 @@ Accretion tier, per-org land, behind the land reverse proxy:
   nimsforestmastery:
     lifecycle: persistent
     network: host
-    port: 8110
+    port: 8111
     domains:
       - mastery.{{.OrgSlug}}.mynimsforest.com
     env:
       NATS_URL: nats://127.0.0.1:4222
-      PORT: "8110"
+      PORT: "8111"
       ORG_SLUG: "{{.OrgSlug}}"
       IAMNIM_URL: "https://iamnim.com"
       BASE_URL: "https://mastery.{{.OrgSlug}}.mynimsforest.com"

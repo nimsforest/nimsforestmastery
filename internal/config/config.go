@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-// Defaults. The port is the portal's own; nimregistry serves on 8101 on
+// Defaults. The port is the portal's own, free across the land seeds (8110 is taken by callyouragentai); nimregistry serves on 8101 on
 // the same land.
 const (
-	DefaultPort           = "8110"
+	DefaultPort           = "8111"
 	DefaultNATSURL        = "nats://127.0.0.1:4222"
 	DefaultNimRegistryURL = "http://127.0.0.1:8101"
 	DefaultContentDir     = "./content"
