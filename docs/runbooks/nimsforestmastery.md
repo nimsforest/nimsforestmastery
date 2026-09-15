@@ -12,7 +12,7 @@ nimsforest2/docs/architecture/ROLE_MASTERY.md.
   and `/roles/<nim>/changelog` behind iamnim SSO.
 - Agent surface: `/roles/<nim>.md`, `/llms.txt`, `/api/v1/roles`,
   `/api/v1/roles/<nim>/bundle`, behind iamnim PAT Bearer auth.
-- `/health` and `/static/` are public.
+- `/health` and `/api/v1/health` and `/static/` are public.
 
 ## Environment variables
 
@@ -20,6 +20,7 @@ nimsforest2/docs/architecture/ROLE_MASTERY.md.
 | --- | --- | --- | --- |
 | `ORG_SLUG` | yes | none | Single tenancy. The service refuses to start without it. |
 | `PORT` | no | `8111` | HTTP listen port. |
+| `LISTEN` | no | none | Address to bind, e.g. `:8112`. This is how the role places the service, and it wins over `PORT`. |
 | `NATS_URL` | no | `nats://127.0.0.1:4222` | The forest bus. Unreachable NATS degrades, it does not stop the service. |
 | `IAMNIM_URL` | for auth | none, on purpose | Identity service. Empty means every authenticated route answers 503, fail closed. |
 | `BASE_URL` | for SSO | none | The portal's own external URL, the iamnim login return target. Empty means the human role pages answer 503. |
@@ -93,8 +94,8 @@ those keys behind the same bundle shape.
 
 ## Health
 
-`GET /health` is public and answers the nimsforesttool JSON shape
-with per-check detail:
+`GET /health` and `GET /api/v1/health` are public and answer the
+nimsforesttool JSON shape with per-check detail:
 
 - `soil`: the Soil read path. In the disabled state the check says why
   and names the fallback.
@@ -102,16 +103,21 @@ with per-check detail:
 - `iamnim`: reachability. An anonymous 401 from iamnim counts as
   healthy; a network failure or server error does not.
 
-Liveness is separate from degradation. The status code answers "can
-this instance serve roles at all", so an orchestrator can gate on it:
+The status code matches the status field, because honest status is a
+contract obligation and a probe that reads only the code must not see a
+degraded portal as healthy:
 
 - All checks pass: 200 `status: ok`.
-- Some check fails but a role read path remains (for example only the
-  unused nimregistry fallback is down, or iamnim is down): 200
-  `status: degraded` with the per-check reasons. A restart would not
-  help, so the instance is not reported dead.
-- Both the Soil read path and the nimregistry fallback fail: 503
-  `status: unavailable`. No role read path is left.
+- Any check fails: 503 `status: degraded`, with the per-check reasons
+  naming what is down. Read the detail to tell a portal that still
+  serves through the fallback from one with no read path left: only the
+  latter has both `soil` and `nimregistry` failing.
+
+A degraded portal usually keeps serving, so do not restart it on this
+alone. What prevents that is the land role declaring no health block,
+which is the fleet pattern for these tools and is true of this role.
+This endpoint previously answered 200 while degraded to force that
+outcome; it no longer does.
 
 The joining contract runs alongside: register on
 `forest.mycelium.register`, 30s heartbeats, deregister on shutdown.
