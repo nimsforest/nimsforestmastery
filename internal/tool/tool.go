@@ -5,12 +5,10 @@
 package tool
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"sort"
 	"strings"
 	"time"
 
@@ -61,56 +59,24 @@ func (j *Joiner) Leave() {
 	j.registration.Stop()
 }
 
-// HealthHandler serves the health surface in the nimsforesttool JSON
-// shape with per-check detail: the Soil read path, the nimregistry
-// fallback, and iamnim reachability. Liveness is separate from
-// degradation: 503 is reserved for the state where the portal cannot
-// serve roles at all (both the Soil read path and the nimregistry
-// fallback failing). Any other failing check answers 200 with status
-// degraded, so an orchestrator does not restart a serving instance
-// because its unused fallback or the identity service is down. The
-// endpoint itself stays public.
+// HealthHandler serves the standard supporting-tool health surface: the
+// Soil read path, the nimregistry fallback, and iamnim reachability,
+// each with per-check detail.
+//
+// It delegates to the component rather than reimplementing it. The local
+// version answered 200 while degraded, so that a probe would not restart
+// a serving instance over a down fallback. That reasoning no longer
+// holds: the land role declares no health block, so nothing restarts
+// this container on a 503, and answering 200 meant any probe reading
+// only the status code saw a portal with its identity service down as
+// healthy. Severity is not lost, because the per-check detail still
+// names exactly which path failed.
 func HealthHandler(reader soil.Reader, registry *roles.RegistryClient, iamnimURL string) http.HandlerFunc {
-	checks := map[string]nftool.Check{
+	return nftool.HealthHandler(Name, map[string]nftool.Check{
 		"soil":        soilCheck(reader),
 		"nimregistry": registry.Health,
 		"iamnim":      iamnimCheck(iamnimURL),
-	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		names := make([]string, 0, len(checks))
-		for n := range checks {
-			names = append(names, n)
-		}
-		sort.Strings(names)
-
-		detail := map[string]string{}
-		failed := map[string]bool{}
-		status := "ok"
-		for _, n := range names {
-			if err := checks[n](); err != nil {
-				status = "degraded"
-				failed[n] = true
-				detail[n] = err.Error()
-			} else {
-				detail[n] = "ok"
-			}
-		}
-
-		code := http.StatusOK
-		if failed["soil"] && failed["nimregistry"] {
-			// No role read path is left: the portal cannot serve.
-			status = "unavailable"
-			code = http.StatusServiceUnavailable
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(code)
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"status": status,
-			"tool":   Name,
-			"checks": detail,
-		})
-	}
+	})
 }
 
 // soilCheck reports whether the Soil read path works. In the disabled

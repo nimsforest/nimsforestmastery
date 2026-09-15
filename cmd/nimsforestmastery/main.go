@@ -108,7 +108,11 @@ func main() {
 	roleWebRoutes := webAuth.Wrap(webServer.RolePages())
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", tool.HealthHandler(reader, registry, cfg.IamNimURL))
+	// Both paths are part of the contract: a Land probe reads one, the
+	// observability plane the other.
+	health := tool.HealthHandler(reader, registry, cfg.IamNimURL)
+	mux.HandleFunc("GET /health", health)
+	mux.HandleFunc("GET /api/v1/health", health)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", nwc.StaticHandler()))
 	mux.Handle("/api/", agentRoutes)
 	mux.Handle("GET /llms.txt", agentRoutes)

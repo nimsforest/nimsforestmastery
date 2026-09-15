@@ -6,6 +6,7 @@ package config
 import (
 	"flag"
 	"fmt"
+	tool "github.com/nimsforest/nimsforesttool"
 	"os"
 	"strings"
 )
@@ -92,8 +93,11 @@ func Load(args []string) (*Config, error) {
 	}
 
 	return &Config{
-		OrgSlug:        *orgSlug,
-		Listen:         ":" + *port,
+		OrgSlug: *orgSlug,
+		// Placement belongs to the role. LISTEN carries a full address, so
+		// unlike PORT it can also name an interface; the port flag and its
+		// PORT override stay as the fallback.
+		Listen:         tool.ListenAddr("", ":"+*port),
 		NATSURL:        *natsURL,
 		IamNimURL:      *iamnimURL,
 		NimRegistryURL: *nimregistryURL,
