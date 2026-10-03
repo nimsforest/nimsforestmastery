@@ -5,7 +5,7 @@ go 1.25.7
 require (
 	github.com/nats-io/nats.go v1.53.1
 	github.com/nimsforest/nimsforesttool v0.4.0
-	github.com/nimsforest/nimsforestwebcomponents v0.19.1
+	github.com/nimsforest/nimsforestwebcomponents v0.20.0
 )
 
 require (
