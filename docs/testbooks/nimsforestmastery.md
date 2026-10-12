@@ -28,6 +28,26 @@ nim through the registry and both lists grow without a deploy.
 The same check runs automatically in
 `internal/web/server_test.go` (`TestPublicDirectoryEqualsEnumeration`).
 
+## 1b. The doctrine enumeration check
+
+The rendered curriculum must equal the units on disk. Same anti-drift
+guard as check 1, for the only content this repo ships.
+
+```
+# On disk, in the image:
+ls /usr/share/nimsforestmastery/content/doctrine/*.md \
+  | xargs -n1 basename | sed 's|^[0-9]*-||; s|\.md$||' | sort > /tmp/disk-units.txt
+
+# Rendered index:
+curl -s $BASE/doctrine | grep -o 'href="/doctrine/[a-z0-9-]*"' \
+  | sed 's|href="/doctrine/||; s|"||' | sort -u > /tmp/web-units.txt
+
+diff /tmp/disk-units.txt /tmp/web-units.txt && echo EQUAL
+```
+
+PASS: `EQUAL`, and every slug answers 200 on `$BASE/doctrine/<slug>`.
+There is no unit list in the code, so a new file is the whole change.
+
 ## 2. Auth fail-closed checks
 
 ```
@@ -90,10 +110,14 @@ per-role file authored anywhere in this repo.
 
 ## 6. Honest degraded and disabled modes
 
-- Stop NATS (test land only): `/health` answers 200 `degraded` with
+- Stop NATS (test land only): `/health` answers 503 `degraded` with
   the soil check naming the fallback; `/roles/neo.md` still renders,
-  marked degraded with revision 0 stamps.
-- Stop nimregistry too: `/health` answers 503 `unavailable`; role
+  marked degraded with revision 0 stamps. A degraded portal is still
+  serving, so nothing restarts it: the land role declares no health
+  block.
+- Stop nimregistry too: `/health` stays 503 `degraded`, now with both
+  `soil` and `nimregistry` failing, which is how you tell a portal
+  serving through the fallback from one with no read path left; role
   routes answer 503 JSON with a reason; `$BASE/doctrine` keeps
   serving.
 
@@ -103,9 +127,13 @@ per-role file authored anywhere in this repo.
 curl -s $BASE/health | jq
 ```
 
-PASS: 200 `status: ok` with `soil`, `nimregistry` and `iamnim` checks
-when the land is healthy. A failing check that leaves a role read
-path (only the fallback down, or only iamnim down) answers 200
-`status: degraded` with the reason, so an orchestrator does not
-restart a serving instance. 503 `status: unavailable` only when both
-the Soil read path and the nimregistry fallback are down.
+PASS: 200 `status: ok` with the `soil`, `nimregistry` and `iamnim`
+checks all `ok` when the land is healthy.
+
+There are two states, not three: `nimsforesttool`'s shared handler
+answers 200 `ok` when every check passes and 503 `degraded` when any
+check fails. Any single failure, including iamnim alone, is a 503.
+Severity is not lost, because the per-check detail names the path that
+failed. Read the detail, never the status code alone: a portal still
+serving through the fallback and a portal with no read path left both
+answer 503.

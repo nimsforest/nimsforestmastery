@@ -83,6 +83,53 @@ the shared doctrine curriculum (a COPY of `content/`), which is
 role-agnostic and release-coupled until the #257 hub pull adopts the
 pre-declared `catalog.mastery.doctrine.*` keys.
 
+## Doctrine curriculum
+
+The shared curriculum is the only content this repo holds. Units are
+markdown files in `content/doctrine/`, named `NN-slug.md`.
+
+| Part of the file | What it becomes |
+| --- | --- |
+| `NN-` prefix | the order on `/doctrine`, sorted by file name |
+| the rest of the name | the URL slug, `/doctrine/<slug>` |
+| the first `#` heading | the unit title |
+| the first paragraph after it | the summary on the index card |
+
+Keep that first paragraph short. The shipped units run 19 to 64 words,
+and the index card shows the whole thing.
+
+Adding a unit is one file. There is no list to register it in and no
+code to change: `internal/doctrine` reads the directory on every
+request, so a changed file shows up on the next request with no
+restart, and `/doctrine` enumerates whatever is on disk. That is the
+same anti-drift property as the role directory, and the reason this
+service has no hardcoded unit list to go stale.
+
+Two boundaries hold:
+
+- **Role-agnostic only.** Doctrine applies to every role. Anything
+  true of one nim belongs in that nim's artifacts in Soil, never here.
+- **Public repo.** No org data, no role content, no credentials.
+
+Verify before you tag:
+
+```
+go build ./... && go vet ./...
+ORG_SLUG=local ./nimsforestmastery -content ./content -port 8311
+curl -s localhost:8311/doctrine | grep '/doctrine/<slug>'
+curl -si localhost:8311/doctrine/<slug> | head -1
+```
+
+Then look at the page, at desktop width and at a real phone width.
+
+The image carries a COPY of `content/` (never `go:embed`), so a new
+unit reaches a land only through a new tag and a `land plant`. The
+curriculum stays release-coupled until the #257 hub pull adopts the
+pre-declared `catalog.mastery.doctrine.*` keys.
+
+Shipped units: what a forest is; nims and the 5A pattern; operating
+doctrines; where your work runs; AI roll-ups (#501).
+
 ## Docs slot
 
 The bundle's docs index carries relative links on the portal's own
